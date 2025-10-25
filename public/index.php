@@ -12,6 +12,17 @@ require __DIR__ . '/../vendor/autoload.php';
 
 session_start();
 
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
 $container = new Container();
 AppFactory::setContainer($container);
 $app = AppFactory::create();
@@ -54,11 +65,22 @@ $app->get('/admin', function (Request $request, Response $response) use ($contai
 
 $app->get('/admin/login', function (Request $request, Response $response) use ($container) {
     $view = $container->get('view');
-    return $view->render($response, 'admin/login.twig');
+    return $view->render($response, 'admin/login.twig', [
+        'csrf_token' => generateCsrfToken()
+    ]);
 });
 
 $app->post('/admin/login', function (Request $request, Response $response) use ($container) {
     $data = $request->getParsedBody();
+    $view = $container->get('view');
+    
+    if (!verifyCsrfToken($data['csrf_token'] ?? '')) {
+        return $view->render($response, 'admin/login.twig', [
+            'error' => 'Invalid CSRF token',
+            'csrf_token' => generateCsrfToken()
+        ]);
+    }
+    
     $db = $container->get('db');
     
     $stmt = $db->prepare('SELECT * FROM admin_users WHERE username = ?');
@@ -66,6 +88,7 @@ $app->post('/admin/login', function (Request $request, Response $response) use (
     $user = $stmt->fetch();
     
     if ($user && password_verify($data['password'] ?? '', $user['password'])) {
+        session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_id'] = $user['id'];
         $_SESSION['admin_username'] = $user['username'];
@@ -76,9 +99,9 @@ $app->post('/admin/login', function (Request $request, Response $response) use (
         return $response->withHeader('Location', '/admin')->withStatus(302);
     }
     
-    $view = $container->get('view');
     return $view->render($response, 'admin/login.twig', [
-        'error' => 'Invalid username or password'
+        'error' => 'Invalid username or password',
+        'csrf_token' => generateCsrfToken()
     ]);
 });
 

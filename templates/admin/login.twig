@@ -24,6 +24,7 @@
             <div class="error">{{ error }}</div>
         {% endif %}
         <form method="POST" action="/admin/login">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
@@ -34,9 +35,6 @@
             </div>
             <button type="submit">Login</button>
         </form>
-        <div class="hint">
-            Default: username = <strong>admin</strong>, password = <strong>admin123</strong>
-        </div>
     </div>
 </body>
 </html>
