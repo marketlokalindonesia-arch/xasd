@@ -1,6 +1,7 @@
 <?php
 
 use App\Database;
+use App\PluginUploader;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -153,6 +154,94 @@ $app->get('/admin/customers', function (Request $request, Response $response) us
     return $view->render($response, 'admin/customers.twig', [
         'customers' => $customers
     ]);
+});
+
+$app->get('/admin/plugins', function (Request $request, Response $response) use ($container) {
+    if (!isset($_SESSION['admin_logged_in'])) {
+        return $response->withHeader('Location', '/admin/login')->withStatus(302);
+    }
+    
+    $view = $container->get('view');
+    return $view->render($response, 'admin/plugins.twig', [
+        'plugins' => $_SESSION['installed_plugins'] ?? []
+    ]);
+});
+
+$app->get('/admin/plugins/upload', function (Request $request, Response $response) use ($container) {
+    if (!isset($_SESSION['admin_logged_in'])) {
+        return $response->withHeader('Location', '/admin/login')->withStatus(302);
+    }
+    
+    $view = $container->get('view');
+    return $view->render($response, 'admin/plugin-upload.twig', [
+        'csrf_token' => generateCsrfToken()
+    ]);
+});
+
+$app->post('/admin/plugins/upload', function (Request $request, Response $response) use ($container) {
+    if (!isset($_SESSION['admin_logged_in'])) {
+        return $response->withHeader('Location', '/admin/login')->withStatus(302);
+    }
+    
+    $data = $request->getParsedBody();
+    $view = $container->get('view');
+    
+    if (!verifyCsrfToken($data['csrf_token'] ?? '')) {
+        return $view->render($response, 'admin/plugin-upload.twig', [
+            'error' => 'Invalid CSRF token',
+            'csrf_token' => generateCsrfToken()
+        ]);
+    }
+    
+    try {
+        $uploader = new PluginUploader();
+        $files = $request->getUploadedFiles();
+        
+        if (!isset($files['plugin_zip'])) {
+            throw new \Exception('No file uploaded');
+        }
+        
+        $uploadedFile = $files['plugin_zip'];
+        $tempPath = '/tmp/' . $uploadedFile->getClientFilename();
+        $uploadedFile->moveTo($tempPath);
+        
+        $extracted = $uploader->extract($tempPath);
+        $pluginInfo = $uploader->parsePluginInfo($extracted['path']);
+        $menus = $uploader->parseAdminMenus($pluginInfo['main_file']);
+        $schemas = $uploader->extractDatabaseSchema($extracted['path']);
+        
+        if (!isset($_SESSION['installed_plugins'])) {
+            $_SESSION['installed_plugins'] = [];
+        }
+        
+        $_SESSION['installed_plugins'][$extracted['slug']] = [
+            'info' => $pluginInfo,
+            'menus' => $menus,
+            'schemas' => $schemas,
+            'path' => $extracted['path']
+        ];
+        
+        $db = $container->get('db');
+        foreach ($schemas as $schema) {
+            try {
+                $schema = str_replace('{$wpdb->prefix}', '', $schema);
+                $schema = str_replace('wp_', '', $schema);
+                $db->exec($schema);
+            } catch (\Exception $e) {
+                error_log('Schema error: ' . $e->getMessage());
+            }
+        }
+        
+        unlink($tempPath);
+        
+        return $response->withHeader('Location', '/admin/plugins')->withStatus(302);
+        
+    } catch (\Exception $e) {
+        return $view->render($response, 'admin/plugin-upload.twig', [
+            'error' => $e->getMessage(),
+            'csrf_token' => generateCsrfToken()
+        ]);
+    }
 });
 
 $app->run();

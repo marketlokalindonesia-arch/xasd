@@ -1,0 +1,41 @@
+{% extends 'admin/layout.twig' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>WordPress Plugins</h1>
+    <a href="/admin/plugins/upload" class="btn">Upload Plugin</a>
+</div>
+
+{% if plugins|length > 0 %}
+<table>
+    <thead>
+        <tr>
+            <th>Plugin Name</th>
+            <th>Version</th>
+            <th>Description</th>
+            <th>Author</th>
+            <th>Menus</th>
+            <th>Tables</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for slug, plugin in plugins %}
+        <tr>
+            <td><strong>{{ plugin.info.name }}</strong></td>
+            <td>{{ plugin.info.version }}</td>
+            <td>{{ plugin.info.description }}</td>
+            <td>{{ plugin.info.author }}</td>
+            <td>{{ plugin.menus|length }} menus</td>
+            <td>{{ plugin.schemas|length }} tables</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div style="background: white; padding: 40px; text-align: center; border-radius: 10px;">
+    <h3>No plugins installed</h3>
+    <p>Upload a WordPress plugin ZIP file to get started.</p>
+    <a href="/admin/plugins/upload" class="btn">Upload Plugin</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'admin/layout.twig' %}
+
+{% block content %}
+<h1>Upload WordPress Plugin</h1>
+
+{% if error %}
+<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+    {{ error }}
+</div>
+{% endif %}
+
+<div style="background: white; padding: 30px; border-radius: 10px; max-width: 600px;">
+    <form method="POST" action="/admin/plugins/upload" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                Select WordPress Plugin ZIP File
+            </label>
+            <input type="file" name="plugin_zip" accept=".zip" required 
+                   style="padding: 10px; border: 2px dashed #ddd; border-radius: 5px; width: 100%; box-sizing: border-box;">
+        </div>
+        
+        <div style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <h4 style="margin-top: 0;">What happens when you upload:</h4>
+            <ul style="margin-bottom: 0;">
+                <li>Plugin ZIP akan diekstrak dan dianalisis</li>
+                <li>Database tables akan otomatis dibuat</li>
+                <li>Admin menus akan diparse dan ditampilkan</li>
+                <li>Plugin info akan disimpan untuk referensi</li>
+            </ul>
+        </div>
+        
+        <button type="submit" class="btn" style="width: 100%; padding: 15px; font-size: 16px;">
+            Upload & Install Plugin
+        </button>
+    </form>
+    
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="/admin/plugins" style="color: #666;">Back to Plugins</a>
+    </div>
+</div>
+
+<div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+    <h3>Instructions:</h3>
+    <ol>
+        <li>Pilih file ZIP plugin WordPress dari komputer Anda</li>
+        <li>Click "Upload & Install Plugin"</li>
+        <li>Plugin akan otomatis dianalisis dan database tables akan dibuat</li>
+        <li>Admin menus dari plugin akan terdeteksi dan tersedia</li>
+    </ol>
+    
+    <h4>Example:</h4>
+    <p>Anda bisa menggunakan WooCommerce plugin dari folder <code>bahan/</code> dengan membuat ZIP file terlebih dahulu:</p>
+    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">
+cd bahan
+zip -r ../woocommerce.zip .
+    </pre>
+</div>
+{% endblock %}

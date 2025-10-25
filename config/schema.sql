@@ -140,8 +140,9 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 -- Insert default admin user (password: admin123)
+-- Password hash generated with: password_hash('admin123', PASSWORD_DEFAULT)
 INSERT OR IGNORE INTO admin_users (username, password, email, role) 
-VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@example.com', 'admin');
+VALUES ('admin', '$2y$10$7q90YWB6LfKOPKnUKH2qx.TCQ9pB.2cvDFu5Yx4atTonRhHyBN326', 'admin@example.com', 'admin');
 
 -- Insert default settings
 INSERT OR IGNORE INTO settings (setting_key, setting_value) VALUES
