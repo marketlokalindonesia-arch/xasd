@@ -1,0 +1,38 @@
+{% include 'admin/layout.twig' %}
+
+{% block content %}
+<h1>Orders</h1>
+
+{% if orders|length > 0 %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Order Number</th>
+            <th>Customer ID</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.order_number }}</td>
+            <td>{{ order.customer_id }}</td>
+            <td>Rp {{ order.total|number_format(0, ',', '.') }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>
+                <a href="/admin/orders/view/{{ order.id }}" class="btn">View</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No orders found.</p>
+{% endif %}
+{% endblock %}

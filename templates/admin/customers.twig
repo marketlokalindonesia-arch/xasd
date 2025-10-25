@@ -1,0 +1,36 @@
+{% include 'admin/layout.twig' %}
+
+{% block content %}
+<h1>Customers</h1>
+
+{% if customers|length > 0 %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Registered</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.id }}</td>
+            <td>{{ customer.email }}</td>
+            <td>{{ customer.first_name }} {{ customer.last_name }}</td>
+            <td>{{ customer.phone }}</td>
+            <td>{{ customer.created_at }}</td>
+            <td>
+                <a href="/admin/customers/view/{{ customer.id }}" class="btn">View</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No customers found.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% include 'admin/layout.twig' %}
+
+{% block content %}
+<h1>Products</h1>
+
+{% if products|length > 0 %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>SKU</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.id }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.sku }}</td>
+            <td>Rp {{ product.price|number_format(0, ',', '.') }}</td>
+            <td>{{ product.stock_quantity }}</td>
+            <td>{{ product.status }}</td>
+            <td>
+                <a href="/admin/products/edit/{{ product.id }}" class="btn">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No products found.</p>
+{% endif %}
+{% endblock %}
