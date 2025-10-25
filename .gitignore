@@ -1,0 +1,30 @@
+# Composer
+/vendor/
+composer.lock
+
+# Database
+database.sqlite
+*.db
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+/cache/
+*.cache
